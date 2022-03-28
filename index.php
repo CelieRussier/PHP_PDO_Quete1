@@ -1,23 +1,31 @@
-<?php
+<?php 
+
 require_once '_connec.php';
 
 $pdo = new \PDO(DSN, USER, PASS);
 
-echo 'Celie';
-
-/*$query = "SELECT * FROM friend";
+$query = "SELECT * FROM friend";
 $statement = $pdo->query($query);
-$friends = $statement->fetchAll();
+$friends = $statement->fetchALL(PDO::FETCH_ASSOC);
 
-echo '<br> <br> <br>';
+//Création liste HTML de tous les friends :
 
-$query = "INSERT INTO friend (firstname, lastname) VALUES ('Chandler', 'Bing')";
-$statement = $pdo->exec($query);*/
+foreach($friends as $friend) {
+?>
 
+<div>
+    <ul>
+        <li><?php echo $friend['firstname'] . ' ' . $friend['lastname']; ?></li>
+    </ul>
+</div>
+
+<?php
+}
 ?>
 
 <form  action="index.php" method="post">
     <div>
+        <h1>Ajoute un ami !</h1>
       <label  for="firstname">Prénom :</label>
       <input  type="text"  id="prenom"  name="firstname">
             <p><?php if (empty($_POST['firstname'])) {
@@ -36,17 +44,21 @@ $statement = $pdo->exec($query);*/
     <div  class="button">
       <button  type="submit">Envoyer votre message></button>
     </div>
+</form>
 
-<?php
+    <?php
 
 $firstname = trim($_POST['firstname']);
 $lastname = trim($_POST['lastname']);
-$query = "INSERT INTO friend (firstname, lastname) VALUES ('$firstname', '$lastname')";
-$statement = $pdo->prepare($query);
+if ( !empty($firstname) && !empty($lastname)) {
+    if (strlen($firstname) < 45 && strlen($lastname) < 45) {
+        $newQuery = "INSERT INTO friend (firstname, lastname) VALUES (:firstname, :lastname)";
+        $statement = $pdo->prepare($newQuery);
 
-$statement->bindValue(':firstname', $firstname, \PDO::PARAM_STR);
-$statement->bindValue(':lastname', $lastname, \PDO::PARAM_STR);
+        $statement->bindValue(':firstname', $firstname, \PDO::PARAM_STR);
+        $statement->bindValue(':lastname', $lastname, \PDO::PARAM_STR);
 
-$statement->execute();
+        $statement->execute();
+    }
+}
 
-$friends = $statement->fetchAll();
